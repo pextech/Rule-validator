@@ -8,7 +8,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'rule-validator Api-documentation',
+      title: 'rule-validator-api Api-documentation',
       version: '0.1.0',
       description:
             'This is an app that validates relevant inputs ',
