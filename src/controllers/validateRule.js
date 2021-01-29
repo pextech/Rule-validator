@@ -1,15 +1,14 @@
 import isObject from 'isobject';
 
 // import model
-const validaterule = require('../models').validaterule;
+const { validaterule } = require('../models');
 
 // function Validate rules
 
 const rulevalidator = async (req, res) => {
-  // check if only Rule and data are passed 
+  // check if only Rule and data are passed
 
   if ((req.body.rule || req.body.data) && Object.keys(req.body).length === 2) {
-
     // adding flattened field type to data field
 
     const addFlatten = { ...req.body.data, type: 'flattened' };
@@ -93,7 +92,6 @@ const rulevalidator = async (req, res) => {
     // this tests only rule and data
 
     if (req.body.rule && req.body.data) {
-
       // perform given tasks when passed 'eq'
 
       if (req.body.rule.condition === 'eq' || req.body.rule.condition === 'contains') {
@@ -179,14 +177,11 @@ const rulevalidator = async (req, res) => {
             },
           },
 
-        }); 
+        });
 
         // below line catches any error
-
       }).catch((error) => { res.status(500).json({ error }); });
-
-    }  // if payload passed doesn't exists
-    
+    } // if payload passed doesn't exists
   } else {
     return res.status(400).json(
       {
