@@ -20,7 +20,7 @@ const options = {
     },
     servers: [
       {
-        url: 'https://rule-validator.herokuapp.com/',
+        url: 'https://rule-validator-app.herokuapp.com/',
       },
     ],
     produces: ['application/json'],
