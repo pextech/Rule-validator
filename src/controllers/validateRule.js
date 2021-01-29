@@ -1,14 +1,21 @@
-/* eslint-disable eqeqeq */
-/* eslint-disable no-prototype-builtins */
-/* eslint-disable max-len */
-/* eslint-disable prefer-destructuring */
-/* eslint-disable consistent-return */
 import isObject from 'isobject';
 
+// import model
 const validaterule = require('../models').validaterule;
 
+// function Validate rules
+
 const rulevalidator = async (req, res) => {
+  // check if only Rule and data are passed 
+
   if ((req.body.rule || req.body.data) && Object.keys(req.body).length === 2) {
+
+    // adding flattened field type to data field
+
+    const addFlatten = { ...req.body.data, type: 'flattened' };
+
+    // check if Rule is passed
+
     if (req.body.rule == null) {
       return res.status(400).json(
         {
@@ -18,7 +25,10 @@ const rulevalidator = async (req, res) => {
         },
       );
     }
-    if (req.body.data == null) {
+
+    // check if Data is passed
+
+    if (addFlatten == null) {
       return res.status(400).json(
         {
           message: 'data is required.',
@@ -27,6 +37,9 @@ const rulevalidator = async (req, res) => {
         },
       );
     }
+
+    // check if Rule is an Object
+
     if (!isObject(req.body.rule)) {
       return res.status(400).json(
         {
@@ -36,7 +49,10 @@ const rulevalidator = async (req, res) => {
         },
       );
     }
-    if (!isObject(req.body.data)) {
+
+    // check if Data is an object
+
+    if (!isObject(addFlatten)) {
       return res.status(400).json(
         {
           message: 'data should be an object.',
@@ -48,11 +64,17 @@ const rulevalidator = async (req, res) => {
 
     // start validating
 
-    const dataField = req.body.data;
     const ruleField = req.body.rule.field;
 
-    const checkField = ruleField in dataField;
+    const field = ruleField.split('.')[0];
+
+    // const checkField = ruleField in addFlatten;
+
+    const checkField = addFlatten.hasOwnProperty(field);
+
     const conditionValue = req.body.rule.condition_value;
+
+    // check if Field passed has corresponding field in data
 
     if (!checkField) {
       return res.status(400).json(
@@ -63,10 +85,17 @@ const rulevalidator = async (req, res) => {
         },
       );
     }
-    const fieldValue = Object.values(dataField);
+
+    const fieldValue = Object.values(addFlatten);
 
     const find = fieldValue.find((el) => el == conditionValue);
+
+    // this tests only rule and data
+
     if (req.body.rule && req.body.data) {
+
+      // perform given tasks when passed 'eq'
+
       if (req.body.rule.condition === 'eq' || req.body.rule.condition === 'contains') {
         if (find != conditionValue) {
           return res.status(400).json(
@@ -86,6 +115,9 @@ const rulevalidator = async (req, res) => {
           );
         }
       }
+
+      // perform given tasks when passed 'neq'
+
       if (req.body.rule.condition === 'neq') {
         if (find == conditionValue) {
           return res.status(400).json(
@@ -105,6 +137,9 @@ const rulevalidator = async (req, res) => {
           );
         }
       }
+
+      // perform given tasks when passed 'gt'
+
       if (req.body.rule.condition === 'gt') {
         if (find < conditionValue) {
           return res.status(400).json(
@@ -124,9 +159,12 @@ const rulevalidator = async (req, res) => {
           );
         }
       }
+
+      // this puts data in the database
+
       validaterule.create({
         rule: req.body.rule,
-        data: req.body.data,
+        data: addFlatten,
       }).then(() => {
         res.status(201).json({
           message: `field ${req.body.rule.field} successfully validated.`,
@@ -141,9 +179,14 @@ const rulevalidator = async (req, res) => {
             },
           },
 
-        });
+        }); 
+
+        // below line catches any error
+
       }).catch((error) => { res.status(500).json({ error }); });
-    }
+
+    }  // if payload passed doesn't exists
+    
   } else {
     return res.status(400).json(
       {
